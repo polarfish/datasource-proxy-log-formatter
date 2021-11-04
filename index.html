@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Datasource Proxy log formatter service</title>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.3/gh-fork-ribbon.min.css"/>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
+  <style>
+    body {
+      font-family: 'Ubuntu Mono', monospace;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+<a class="github-fork-ribbon" href="https://github.com/polarfish/datasource-proxy-log-formatter"
+   data-ribbon="Fork me on GitHub"
+   title="Fork me on GitHub">Fork me on GitHub</a>
+<div class="container-fluid d-flex flex-column vh-100 overflow-hidden">
+  <div class="flex-shrink-0">
+    <h1>Datasource Proxy log formatter service</h1>
+  </div>
+
+  <div class="row flex-grow-1 overflow-hidden">
+    <div class="col-3 mh-100 overflow-auto py-2">
+      <button type="button" id="formatLog" class="btn btn-danger">Format Log</button>
+      <button type="button" id="loadDemoLog" class="btn btn-info">Demo Log</button>
+      <button type="button" id="loadDemoMultiLog" class="btn btn-info">Demo Multi Log</button>
+      <br/>
+      <br/>
+      <textarea class="form-control h-75" id="logEntries"
+                spellcheck="false"
+                placeholder="Paste one or more SLF4JQueryLoggingListener json log entries"></textarea>
+    </div>
+    <div class='col mh-100 overflow-auto'>
+      <div class='row flex-grow-1'>
+        <div class="col mh-100 overflow-auto py-2" id="sql" style="font-size: 14px;">
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+<script type="text/javascript" src="https://unpkg.com/sql-formatter@latest/dist/sql-formatter.min.js"></script>
+<script>
+  let formatLogButton = document.getElementById("formatLog");
+  let loadDemoLog = document.getElementById("loadDemoLog");
+  let loadDemoMultiLog = document.getElementById("loadDemoMultiLog");
+  let logEntriesTextarea = document.getElementById("logEntries");
+  let sqlCodeBlock = document.getElementById("sql");
+
+  formatLogButton.addEventListener("click", function (e) {
+
+    let formattedLogInnerHtml = "";
+    logEntriesTextarea.value.split("\n").forEach(line => {
+
+      if (!line.includes("SLF4JQueryLoggingListener")) {
+        return;
+      }
+
+      let match = line.match("([{]{1}.*[}]{1})");
+      if (!match) {
+        alert("Bad input");
+        return;
+      }
+
+      let logEntriesJson = JSON.parse(match[0]);
+
+      while (logEntriesJson.params[0] && logEntriesJson.params[0].length > 0) {
+        let param = logEntriesJson.params[0].shift();
+        // console.log("Interpolating query with " + param);
+        logEntriesJson.query[0] = logEntriesJson.query[0].replace(
+            "?",
+            param !== "" && Number.isInteger(Number(param))
+                ? param
+                : "'" + param + "'");
+      }
+
+      let formattedSql = sqlFormatter.format(logEntriesJson.query[0], {
+        language: "sql",
+        uppercase: true
+      });
+      formattedLogInnerHtml += `<code class="language-sql">
+-- connection: ${logEntriesJson.connection}
+-- time: ${logEntriesJson.time}
+-- success: ${logEntriesJson.success}
+-- type: ${logEntriesJson.type}
+-- batch: ${logEntriesJson.batch}
+-- batchSize: ${logEntriesJson.batchSize}
+-- querySize: ${logEntriesJson.querySize}
+${formattedSql}
+</code>
+`;
+
+    });
+
+    sqlCodeBlock.innerHTML = "<pre>" + formattedLogInnerHtml + "</pre>";
+    hljs.highlightAll();
+  });
+
+  loadDemoLog.addEventListener('click', function () {
+    logEntriesTextarea.value =
+        `2021-10-14 15:29:52.409 DEBUG [payment-batch,,,] 90994 --- [           main] n.t.d.l.l.SLF4JQueryLoggingListener      : {"name":"dataSource-proxy", "connection":121, "time":2, "success":true, "type":"Prepared", "batch":false, "querySize":1, "batchSize":0, "query":["SELECT * FROM Customers WHERE CustomerId = ?"], "params":[["e98a53a5-9ca2-4c8b-8ecd-9bcb076e02c0"]]}`;
+  });
+
+  loadDemoMultiLog.addEventListener('click', function () {
+    logEntriesTextarea.value =
+        `2021-11-04 13:12:58.326 DEBUG [payment-batch,,,] 39072 --- [           main] n.t.d.l.l.SLF4JQueryLoggingListener      : {"name":"dataSource-proxy", "connection":1, "time":2, "success":true, "type":"Prepared", "batch":false, "querySize":1, "batchSize":0, "query":["INSERT INTO Customers (CustomerName, ContactName, Address, City, PostalCode, Country) VALUES (?, ?, ?, ?, ?, ?)"], "params":[["Cardinal", "Tom B. Erichsen", "Skagen 21", "Stavanger","4006","Norway"]]}
+2021-11-04 13:12:58.420 DEBUG [payment-batch,,,] 39072 --- [           main] n.t.d.l.l.SLF4JQueryLoggingListener      : {"name":"dataSource-proxy", "connection":2, "time":2, "success":true, "type":"Prepared", "batch":false, "querySize":1, "batchSize":0, "query":["INSERT INTO Customers (CustomerName, ContactName, Address, City, PostalCode, Country) VALUES (?, ?, ?, ?, ?, ?)"], "params":[["Around the Horn", "Thomas Hardy", "120 Hanover Sq.", "London","WA1 1DP","UK"]]}
+2021-11-04 13:12:58.486 DEBUG [payment-batch,,,] 39072 --- [           main] n.t.d.l.l.SLF4JQueryLoggingListener      : {"name":"dataSource-proxy", "connection":3, "time":4, "success":true, "type":"Prepared", "batch":false, "querySize":1, "batchSize":0, "query":["INSERT INTO Customers (CustomerName, ContactName, Address, City, PostalCode, Country) VALUES (?, ?, ?, ?, ?, ?)"], "params":[["Berglunds snabbköp", "Christina Berglund", "Berguvsvägen 8", "Luleå","S-958 22","Sweden"]]}`;
+  });
+</script>
+</html>
