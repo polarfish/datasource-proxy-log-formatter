@@ -64,3 +64,8 @@ logging:
 ```
 
 For more configuration examples check [datasource-proxy-examples](https://github.com/ttddyy/datasource-proxy-examples)
+
+## Screenshots
+
+![image](https://user-images.githubusercontent.com/1070579/140603447-0a4dddfb-3ffb-43bc-a891-2e119ad23696.png)
+
