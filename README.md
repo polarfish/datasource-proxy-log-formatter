@@ -8,6 +8,11 @@ Extracts, interpolates, formats and pretty prints SQL from [datasource-proxy](ht
 - formats the queries using [sql-formatter](https://github.com/zeroturnaround/sql-formatter)
 - highlights the queries using [highlight.js](https://github.com/highlightjs/highlight.js)
 
+## Screenshots
+
+![image](https://user-images.githubusercontent.com/1070579/141092105-873e98f6-84ef-48d0-94d8-ab38778ae5a1.png)
+
+
 ## Configuring Datasource Proxy for Spring Boot application
 
 #### DatasourceProxyConfig.java
@@ -64,8 +69,3 @@ logging:
 ```
 
 For more configuration examples check [datasource-proxy-examples](https://github.com/ttddyy/datasource-proxy-examples)
-
-## Screenshots
-
-![image](https://user-images.githubusercontent.com/1070579/140603447-0a4dddfb-3ffb-43bc-a891-2e119ad23696.png)
-
