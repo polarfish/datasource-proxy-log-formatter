@@ -13,7 +13,17 @@ Extracts, interpolates, formats and pretty prints SQL from [datasource-proxy](ht
 ![image](https://user-images.githubusercontent.com/1070579/141092105-873e98f6-84ef-48d0-94d8-ab38778ae5a1.png)
 
 
-## Configuring Datasource Proxy for Spring Boot application
+## Configuring Datasource Proxy for Spring Boot Tests
+
+#### pom.xml
+```xml
+ <dependency>
+    <groupId>net.ttddyy</groupId>
+    <artifactId>datasource-proxy</artifactId>
+    <version>1.7</version>
+    <scope>test</scope>
+</dependency>
+```
 
 #### DatasourceProxyConfig.java
 ```java
