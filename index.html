@@ -70,37 +70,40 @@
 
       let logEntriesJson = JSON.parse(match[0]);
 
-      while (logEntriesJson.params[0] && logEntriesJson.params[0].length > 0) {
-        let param = logEntriesJson.params[0].shift();
-        // console.log("Interpolating query with " + param);
-        logEntriesJson.query[0] = logEntriesJson.query[0].replace(
-            "?",
-            param !== "" && Number.isInteger(Number(param))
-                ? param
-                : "'" + param + "'");
-      }
+      let query;
+      for (let i = 0; i < logEntriesJson.params.length; i++) {
+        const params = logEntriesJson.params[i];
+        query = logEntriesJson.query[0];
+        while (params && params.length > 0) {
+          let param = params.shift();
+          query = query.replace("?", formatParameter(param));
+        }
 
-      let formattedSql = sqlFormatter.format(logEntriesJson.query[0], {
-        language: "sql",
-        uppercase: true
-      });
-      formattedLogInnerHtml += `<code class="language-sql">
+        let formattedSql = sqlFormatter.format(query, {
+          language: "sql",
+          uppercase: true
+        });
+        formattedLogInnerHtml += `<code class="language-sql">
 -- connection: ${logEntriesJson.connection}
 -- time: ${logEntriesJson.time}
 -- success: ${logEntriesJson.success}
 -- type: ${logEntriesJson.type}
 -- batch: ${logEntriesJson.batch}
--- batchSize: ${logEntriesJson.batchSize}
+-- batchSize: ${logEntriesJson.batchSize} ${createBatchCounter(i, logEntriesJson.batchSize)}
 -- querySize: ${logEntriesJson.querySize}
 ${formattedSql}
 </code>
 `;
+      }
 
     });
 
     sqlCodeBlock.innerHTML = "<pre>" + formattedLogInnerHtml + "</pre>";
     hljs.highlightAll();
   });
+
+  const createBatchCounter = (index, batchSize) => batchSize > 1 ? ("(" + (index + 1) + "/" + batchSize + ")") : "";
+  const formatParameter = param => param !== "" && Number.isInteger(Number(param)) ? param : ("'" + param + "'")
 
   loadDemoLog.addEventListener('click', function () {
     logEntriesTextarea.value =
