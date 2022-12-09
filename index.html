@@ -90,10 +90,17 @@
           query = query.replace("===placeholder===", formatParameter(param));
         }
 
-        let formattedSql = sqlFormatter.format(query, {
-          language: "sql",
-          uppercase: true
-        });
+        let formattedSql;
+        try {
+          formattedSql = sqlFormatter.format(query, {
+            language: "sql",
+            uppercase: true
+          });
+        } catch (e) {
+          formattedLogInnerHtml += `<code class="language-sql">-- ERROR: SQL formatting failed ${e}</code><br>`;
+          return;
+        }
+
         formattedLogInnerHtml += `<code class="language-sql">
 -- connection: ${logEntriesJson.connection}
 -- time: ${logEntriesJson.time}
