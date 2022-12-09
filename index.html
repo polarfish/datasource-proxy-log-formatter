@@ -128,7 +128,8 @@ ${formattedSql}
   });
 
   const createBatchCounter = (index, batchSize) => batchSize > 1 ? ("(" + (index + 1) + "/" + batchSize + ")") : "";
-  const formatParameter = param => param !== "" && Number.isInteger(Number(param)) ? param : ("'" + param + "'")
+  const escapeHtml = (unsafe) => unsafe.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;')
+  const formatParameter = param => param !== "" && Number.isInteger(Number(param)) ? param : ("'" + escapeHtml(param) + "'")
 
   loadDemoLog.addEventListener('click', function () {
     logEntriesTextarea.value =
