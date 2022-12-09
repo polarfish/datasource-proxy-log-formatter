@@ -84,9 +84,10 @@
       for (let i = 0; i < logEntriesJson.params.length; i++) {
         const params = logEntriesJson.params[i];
         query = logEntriesJson.query[0];
+        query = query.replaceAll("?", "===placeholder===")
         while (params && params.length > 0) {
           let param = params.shift();
-          query = query.replace("?", formatParameter(param));
+          query = query.replace("===placeholder===", formatParameter(param));
         }
 
         let formattedSql = sqlFormatter.format(query, {
