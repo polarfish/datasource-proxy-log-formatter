@@ -81,9 +81,9 @@
       let logEntriesJson = JSON.parse(match[0]);
 
       let query;
-      for (let i = 0; i < logEntriesJson.params.length; i++) {
+      for (let i = 0; i < logEntriesJson.query.length; i++) {
         const params = logEntriesJson.params[i];
-        query = logEntriesJson.query[0];
+        query = logEntriesJson.query[i];
         query = query.replaceAll("?", "===placeholder===")
         while (params && params.length > 0) {
           let param = params.shift();
