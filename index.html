@@ -14,6 +14,9 @@
       font-family: 'Ubuntu Mono', monospace;
       font-size: 14px;
     }
+    .btn {
+      margin: 2px;
+    }
   </style>
 </head>
 <body>
@@ -28,9 +31,13 @@
   <div class="row flex-grow-1 overflow-hidden">
     <div class="col-4 mh-100 overflow-auto py-2">
       <button type="button" id="formatLog" class="btn btn-danger">Format Log</button>
-      <button type="button" id="loadDemoLog" class="btn btn-info">Demo Log</button>
-      <button type="button" id="formatSql" class="btn btn-danger">Format SQL</button>
-      <button type="button" id="loadDemoSql" class="btn btn-info">Demo SQL</button>
+      <select id="sqlDialect" class="btn btn-secondary">
+        <option value="sql" selected>Standard SQL</option>
+        <option value="mysql">MySQL</option>
+        <option value="tsql">Microsoft SQL Server</option>
+        <option value="plsql">Oracle</option>
+        <option value="postgresql">PostgreSQL</option>
+      </select>
       <br/>
       <br/>
       <textarea class="form-control h-75" id="logEntries"
@@ -48,12 +55,10 @@
 </div>
 </body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-<script src="https://unpkg.com/sql-formatter@12.0.3/dist/sql-formatter.min.js"></script>
+<script src="https://unpkg.com/sql-formatter@15.5.1/dist/sql-formatter.min.js"></script>
 <script>
   let formatLogButton = document.getElementById("formatLog");
-  let formatSqlButton = document.getElementById("formatSql");
   let loadDemoLog = document.getElementById("loadDemoLog");
-  let loadDemoSql = document.getElementById("loadDemoSql");
   let logEntriesTextarea = document.getElementById("logEntries");
   let sqlCodeBlock = document.getElementById("sql");
 
@@ -93,7 +98,7 @@
         let formattedSql;
         try {
           formattedSql = sqlFormatter.format(query, {
-            language: "sql",
+            language: "tsql",
             uppercase: true
           });
         } catch (e) {
@@ -120,35 +125,9 @@ ${formattedSql}
     hljs.highlightAll();
   });
 
-  formatSqlButton.addEventListener("click", function (e) {
-    let input = logEntriesTextarea.value;
-
-    if (!input || input.includes("SLF4JQueryLoggingListener")) {
-      return;
-    }
-
-    let formattedSql = sqlFormatter.format(logEntriesTextarea.value, {
-      language: "sql",
-      uppercase: true
-    });
-    sqlCodeBlock.innerHTML = `<pre><code class="language-sql">${formattedSql}</code></pre>`;
-    hljs.highlightAll();
-  });
-
   const createBatchCounter = (index, batchSize) => batchSize > 1 ? ("(" + (index + 1) + "/" + batchSize + ")") : "";
   const escapeHtml = (unsafe) => unsafe.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;')
   const formatParameter = param => param !== "" && Number.isInteger(Number(param)) ? param : ("'" + escapeHtml(param) + "'")
-
-  loadDemoLog.addEventListener('click', function () {
-    logEntriesTextarea.value =
-        `2021-10-14 15:29:52.409 DEBUG [employee-service,,,] 90994 --- [           main] n.t.d.l.l.SLF4JQueryLoggingListener      : {"name":"dataSource-proxy", "connection":121, "time":2, "success":true, "type":"Prepared", "batch":false, "querySize":1, "batchSize":0, "query":["SELECT * FROM employees employees0_ WHERE employees0_.id = ?"], "params":[["e98a53a5-9ca2-4c8b-8ecd-9bcb076e02c0"]]}
-2021-10-14 15:29:53.662 DEBUG [employee-service,,,] 86163 --- [           main] n.t.d.l.l.SLF4JQueryLoggingListener      : {"name":"dataSource-proxy", "connection":122, "time":17, "success":true, "type":"Prepared", "batch":false, "querySize":1, "batchSize":0, "query":["select * from employees employees0_ where (employees0_.department=? and (employees0_.relation_id=? or employees0_.relation_id=?) and (employees0_.stream is null or employees0_.stream=? or (employees0_.relation_id=? or employees0_.relation_id=? or employees0_.relation_id=?) and (employees0_.stream=?)) or employees0_.department=? and (employees0_.relation_id=? or employees0_.relation_id=? or employees0_.relation_id=? or employees0_.relation_id=?) and (employees0_.stream is null or employees0_.stream=? or (employees0_.relation_id=? or employees0_.relation_id=? or employees0_.relation_id=?) and (employees0_.stream=?)) or employees0_.department=? and (employees0_.relation_id=? or employees0_.relation_id=? or employees0_.relation_id=? or employees0_.relation_id=? or employees0_.relation_id=? or employees0_.relation_id=? or employees0_.relation_id=? or employees0_.relation_id=? or employees0_.relation_id=?) and (employees0_.stream is null or employees0_.stream=? or (employees0_.relation_id=? or employees0_.relation_id=? or employees0_.relation_id=?) and (employees0_.stream=?)) or employees0_.department=? and (employees0_.relation_id=? or employees0_.relation_id=? or employees0_.relation_id=?) and (employees0_.stream is null or employees0_.stream=? or (employees0_.relation_id=? or employees0_.relation_id=? or employees0_.relation_id=?) and (employees0_.stream=?))) and (employees0_.status=? or employees0_.status=? or employees0_.status=? or employees0_.status=? or employees0_.status=? or employees0_.status=? or employees0_.status=? or employees0_.status=?) order by employees0_.start_date desc, employees0_.created_at desc limit ?"], "params":[["RnD","7c1e621fef6f4756bed27a53e97922b3","381e431f1e2346dda92f13115b4149de","","7c1e621fef6f4756bed27a53e97922b3","d60df6614cc946e594fd084e20ace081","8b1e622fef7f4756ded27a53e98922a4","Neo","Sales","8w32f6618bc946e594fd084e20ace081","8b1e622fef7f4756ded27a53e98922a4","d60df6614cc946e594fd084e20ace081","c4rtf6614cc946e594fd084e20ace081","","7c1e621fef6f4756bed27a53e97922b3","d60df6614cc946e594fd084e20ace081","8b1e622fef7f4756ded27a53e98922a4","Neo","Logistics","980df6618bc946e594fd084e20ace081","800df6618bc946e594fd084e20ace081","8w32f6618bc946e594fd084e20ace081","8w32f6618bc946e594fd084e20ace092","8b1e622fef7f4756ded27a53e98922a4","d60df6614cc946e594fd084e20ace081","c4rtf6614cc946e594fd084e20ace081","u4rtf6er4cc946e594fd084e20ace081","8b1e622fef7f4756ded27a53e98922b5","","7c1e621fef6f4756bed27a53e97922b3","d60df6614cc946e594fd084e20ace081","8b1e622fef7f4756ded27a53e98922a4","Neo","Marketing","980df6618bc946e594fd084e20ace081","8b1e622fef7f4756ded27a53e98922a4","d60df6614cc946e594fd084e20ace081","","7c1e621fef6f4756bed27a53e97922b3","d60df6614cc946e594fd084e20ace081","8b1e622fef7f4756ded27a53e98922a4","Neo","ENTERED","WAITING_ONBOARDING","ONBOARDED","READY","ACKNOWLEDGED","ACTIVE","RESIGNED","TERMINATED","10"]]}`;
-  });
-
-  loadDemoSql.addEventListener('click', function () {
-    logEntriesTextarea.value =
-        `SELECT * FROM employees employees0_ WHERE (employees0_.department = 'RnD' AND (employees0_.relation_id = '7c1e621fef6f4756bed27a53e97922b3' OR employees0_.relation_id = '381e431f1e2346dda92f13115b4149de') AND (employees0_.stream IS NULL OR employees0_.stream = '' OR (employees0_.relation_id = '7c1e621fef6f4756bed27a53e97922b3' OR employees0_.relation_id = 'd60df6614cc946e594fd084e20ace081' OR employees0_.relation_id = '8b1e622fef7f4756ded27a53e98922a4') AND (employees0_.stream = 'Neo')) OR employees0_.department = 'Sales' AND (employees0_.relation_id = '8w32f6618bc946e594fd084e20ace081' OR employees0_.relation_id = '8b1e622fef7f4756ded27a53e98922a4' OR employees0_.relation_id = 'd60df6614cc946e594fd084e20ace081' OR employees0_.relation_id = 'c4rtf6614cc946e594fd084e20ace081') AND (employees0_.stream IS NULL OR employees0_.stream = '' OR (employees0_.relation_id = '7c1e621fef6f4756bed27a53e97922b3' OR employees0_.relation_id = 'd60df6614cc946e594fd084e20ace081' OR employees0_.relation_id = '8b1e622fef7f4756ded27a53e98922a4') AND (employees0_.stream = 'Neo')) OR employees0_.department = 'Logistics' AND (employees0_.relation_id = '980df6618bc946e594fd084e20ace081' OR employees0_.relation_id = '800df6618bc946e594fd084e20ace081' OR employees0_.relation_id = '8w32f6618bc946e594fd084e20ace081' OR employees0_.relation_id = '8w32f6618bc946e594fd084e20ace092' OR employees0_.relation_id = '8b1e622fef7f4756ded27a53e98922a4' OR employees0_.relation_id = 'd60df6614cc946e594fd084e20ace081' OR employees0_.relation_id = 'c4rtf6614cc946e594fd084e20ace081' OR employees0_.relation_id = 'u4rtf6er4cc946e594fd084e20ace081' OR employees0_.relation_id = '8b1e622fef7f4756ded27a53e98922b5') AND (employees0_.stream IS NULL OR employees0_.stream = '' OR (employees0_.relation_id = '7c1e621fef6f4756bed27a53e97922b3' OR employees0_.relation_id = 'd60df6614cc946e594fd084e20ace081' OR employees0_.relation_id = '8b1e622fef7f4756ded27a53e98922a4') AND (employees0_.stream = 'Neo')) OR employees0_.department = 'Marketing' AND (employees0_.relation_id = '980df6618bc946e594fd084e20ace081' OR employees0_.relation_id = '8b1e622fef7f4756ded27a53e98922a4' OR employees0_.relation_id = 'd60df6614cc946e594fd084e20ace081') AND (employees0_.stream IS NULL OR employees0_.stream = '' OR (employees0_.relation_id = '7c1e621fef6f4756bed27a53e97922b3' OR employees0_.relation_id = 'd60df6614cc946e594fd084e20ace081' OR employees0_.relation_id = '8b1e622fef7f4756ded27a53e98922a4') AND (employees0_.stream = 'Neo'))) AND (employees0_.status = 'ENTERED' OR employees0_.status = 'WAITING_ONBOARDING' OR employees0_.status = 'ONBOARDED' OR employees0_.status = 'READY' OR employees0_.status = 'ACKNOWLEDGED' OR employees0_.status = 'ACTIVE' OR employees0_.status = 'RESIGNED' OR employees0_.status = 'TERMINATED') ORDER BY employees0_.start_date desc, employees0_.created_at desc LIMIT 10;`;
-  });
 
 </script>
 </html>
